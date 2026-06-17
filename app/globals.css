@@ -1,26 +1,266 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --font-sans: var(--font-outfit), sans-serif;
+  --font-serif: var(--font-fraunces), serif;
 
-@theme inline {
+  --color-forest-950: #06150D;
+  --color-forest-900: #0A1F14;
+  --color-forest-850: #11261D;
+  --color-forest-800: #163528;
+  --color-forest-700: #1F3A2E;
+  --color-forest-600: #2d6a4f;
+  --color-forest-500: #40916c;
+  --color-forest-400: #52b788;
+  --color-forest-300: #74c69d;
+  --color-forest-200: #95d5b2;
+  --color-forest-100: #d8f3dc;
+
+  --color-earth-900: #3e2723;
+  --color-earth-800: #4e342e;
+  --color-earth-700: #5d4037;
+  --color-earth-600: #6d4c41;
+  --color-earth-500: #8d6e63;
+  --color-earth-400: #a1887f;
+  --color-earth-300: #bcaaa4;
+  --color-earth-200: #d7ccc8;
+  --color-earth-100: #efebe9;
+
+  --color-cream-950: #0a1e14;
+  --color-cream-900: #0d251a;
+  --color-cream-800: #11261D;
+  --color-cream-50: #07170F;
+
+  --color-coral-600: #b0553c;
+  --color-coral-500: #E07A5F;
+  --color-coral-400: #ea9881;
+  --color-coral-300: #f4beaf;
+
+  --color-teal-600: #2a7368;
+  --color-teal-500: #3D9E8F;
+  --color-teal-400: #63b3a6;
+  --color-teal-300: #9cd1c8;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-muted-text: var(--muted-text);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #0B1C12; /* Deep forest green-black */
+  --foreground: #E8EDE9; /* Warm off-white */
+  --card-bg: #11261D; /* Rich dark green card fill */
+  --card-border: #2A4A3A; /* Subtle dark forest border */
+  --muted-text: #A3C4B1; /* Bright sage for secondary text and subheadings */
+  --card-shadow: 0.2rem 0.4rem 1.2rem rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0.4rem 0.8rem 1.8rem rgba(0, 0, 0, 0.6), 0 0 15px rgba(82, 183, 136, 0.15);
+  --card-border-hover: #3D6E54;
+  --dot-color: rgba(82, 183, 136, 0.06); /* Glowing minty dots */
+
+  /* Botanical Tree Colors - Permanent Dark Mode (Luminous neon forest tones, dark earthy trunk) */
+  --tree-trunk: #3e2723; /* Deep dark wood trunk */
+  --tree-branch: #4e342e; /* Dark brown branches */
+  
+  --tree-leaf-h80-1: #52b788; /* Bright emerald green */
+  --tree-leaf-h80-2: #74c69d; /* Light mint green */
+  --tree-leaf-h80-3: #2d6a4f; /* Dark deep green */
+  
+  --tree-leaf-h55-1: #74c69d; /* Light mint */
+  --tree-leaf-h55-2: #95d5b2; /* Luminous pale green */
+  --tree-leaf-h55-3: #40916c; /* Emerald */
+  
+  --tree-leaf-h35-1: #e9c46a; /* Luminous gold */
+  --tree-leaf-h35-2: #f4a261; /* Autumn orange */
+  --tree-leaf-h35-3: #8d6e63; /* Withered brown */
+  
+  --tree-leaf-h0-1: #8d6e63; /* Withered brown */
+  --tree-leaf-h0-2: #a1887f; /* Grey-brown */
+  --tree-leaf-h0-3: #4e342e; /* Dark brown */
+  
+  --tree-pollen: #a8e6cf; /* Glowing mint pollen */
+  --tree-blossom: #ff8b94; /* Luminous glowing pink/coral blossom */
+  --tree-sunlight: rgba(82, 183, 136, 0.12); /* Soft moonlight glow */
+  --tree-shadow: drop-shadow(0 12px 35px rgba(82, 183, 136, 0.28));
+}
+
+.dark {
+  /* Exactly mirror :root to avoid any light mode mismatch */
+  --background: #0B1C12;
+  --foreground: #E8EDE9;
+  --card-bg: #11261D;
+  --card-border: #2A4A3A;
+  --muted-text: #A3C4B1;
+  --card-shadow: 0.2rem 0.4rem 1.2rem rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0.4rem 0.8rem 1.8rem rgba(0, 0, 0, 0.6), 0 0 15px rgba(82, 183, 136, 0.15);
+  --card-border-hover: #3D6E54;
+  --dot-color: rgba(82, 183, 136, 0.06);
+
+  --tree-trunk: #3e2723;
+  --tree-branch: #4e342e;
+  
+  --tree-leaf-h80-1: #52b788;
+  --tree-leaf-h80-2: #74c69d;
+  --tree-leaf-h80-3: #2d6a4f;
+  
+  --tree-leaf-h55-1: #74c69d;
+  --tree-leaf-h55-2: #95d5b2;
+  --tree-leaf-h55-3: #40916c;
+  
+  --tree-leaf-h35-1: #e9c46a;
+  --tree-leaf-h35-2: #f4a261;
+  --tree-leaf-h35-3: #8d6e63;
+  
+  --tree-leaf-h0-1: #8d6e63;
+  --tree-leaf-h0-2: #a1887f;
+  --tree-leaf-h0-3: #4e342e;
+  
+  --tree-pollen: #a8e6cf;
+  --tree-blossom: #ff8b94;
+  --tree-sunlight: rgba(82, 183, 136, 0.12);
+  --tree-shadow: drop-shadow(0 12px 35px rgba(82, 183, 136, 0.28));
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  background-image: radial-gradient(var(--dot-color) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
 }
+
+/* Custom keyframes for drifting clouds */
+@keyframes drift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(100px); }
+  100% { transform: translateX(0); }
+}
+
+/* Custom keyframes for swaying trees */
+@keyframes sway {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+}
+
+/* Glassmorphism utility card styling */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    var(--card-shadow);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.glass-panel:hover {
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    0 0 20px rgba(82, 183, 136, 0.15),
+    var(--card-shadow-hover);
+  border-color: var(--card-border-hover);
+}
+
+/* Organic custom utility styles */
+.shadow-organic {
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.shadow-organic:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+.text-gradient-forest {
+  background: linear-gradient(135deg, #52b788 0%, #d8f3dc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark .text-gradient-forest {
+  background: linear-gradient(135deg, #52b788 0%, #d8f3dc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Wavy organic details */
+.border-organic-wavy {
+  border-radius: 60% 40% 60% 40% / 40% 60% 40% 60%;
+}
+
+/* Tactile inner shadow */
+.inner-shadow-inset {
+  box-shadow: inset 1px 2px 6px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.dark .inner-shadow-inset {
+  box-shadow: inset 1px 2px 6px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Custom range sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--background) !important;
+  height: 8px !important;
+  border-radius: 9999px !important;
+  outline: none;
+  box-shadow: inset 1px 2px 6px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.dark input[type="range"] {
+  background: var(--background) !important;
+  box-shadow: inset 1px 2px 6px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--tree-blossom, #ff8b94) !important; /* Luminous pink knob */
+  cursor: pointer;
+  border: 2px solid var(--background) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--tree-blossom, #ff8b94) !important;
+  cursor: pointer;
+  border: 2px solid var(--background) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+

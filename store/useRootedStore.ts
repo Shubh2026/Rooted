@@ -225,7 +225,7 @@ export const useRootedStore = create<RootedState>()(
 
         const timestampStr = new Date().toISOString();
         const newInstance: LoggedActionInstance = {
-          id: Math.random().toString(36).substring(2, 9),
+          id: crypto.randomUUID(),
           actionId: actionDetails.id,
           category: actionDetails.category,
           name: actionDetails.name,
@@ -332,7 +332,7 @@ export const useRootedStore = create<RootedState>()(
           badges: updatedBadges,
           streak: updatedStreak,
           lastLoggedDate: timestampStr,
-          hasNewBlossom: newlyCompletedChallenge || newlyUnlockedBadge || Math.random() < 0.2
+          hasNewBlossom: newlyCompletedChallenge || newlyUnlockedBadge,
         });
       },
 

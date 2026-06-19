@@ -82,7 +82,7 @@ Users begin with a detailed carbon footprint onboarding quiz, receive a calculat
 - "All Actions" shortcut link
 
 ### 🛡️ Stability, Security & Accessibility
-- **Comprehensive Unit Testing** — 55 unit tests using **Vitest** validating calculations, badge unlocks, streak progression, and mock data generators.
+- **Comprehensive Unit Testing & Code Modularity** — 94 unit and component tests using **Vitest** and **React Testing Library** validating calculations, badge unlocks, streak progression, component rendering, and custom hooks. Significantly improved code modularity by separating business logic into custom hooks (`useTreeGrowth`, `useActions`, `useCarbonCalculator`) and breaking down dashboard components.
 - **Enterprise-Grade Security Headers** — Configured via `next.config.ts`, featuring a strict `Content-Security-Policy` (CSP), `X-Frame-Options: DENY` (clickjacking protection), HSTS (HTTPS preload), `X-Content-Type-Options: nosniff` (MIME-sniffing protection), and `Referrer-Policy`.
 - **Sanitized localStorage Persistence** — Robust schema validation and exception handling when reading/writing client state.
 - **Accessibility (WCAG 2.1 AA) Compliance**:

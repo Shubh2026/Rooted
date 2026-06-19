@@ -4,7 +4,7 @@ import React from 'react';
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
+  errorRef: string | null; // short opaque ID for support — never exposes raw message
 }
 
 interface ErrorBoundaryProps {
@@ -15,19 +15,22 @@ interface ErrorBoundaryProps {
 export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, errorRef: null };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+  static getDerivedStateFromError(_error: Error): ErrorBoundaryState {
+    // Generate a short opaque reference ID — no raw error details in state
+    const ref = Date.now().toString(36).toUpperCase();
+    return { hasError: true, errorRef: ref };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[Rooted ErrorBoundary]', error, info.componentStack);
+    // Raw error details stay in the console only — never rendered to the DOM
+    console.error('[Rooted ErrorBoundary] ref=' + this.state.errorRef, error, info.componentStack);
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, errorRef: null });
   };
 
   render() {
@@ -42,10 +45,10 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
             <p className="text-sm text-[#A3C4B1] max-w-xs mx-auto">
               The forest encountered an unexpected error. Your progress is safe — try refreshing the page.
             </p>
-            {this.state.error && (
-              <pre className="mt-3 text-[10px] text-red-400/70 max-w-sm overflow-auto text-left bg-red-950/20 p-3 rounded-xl border border-red-900/30">
-                {this.state.error.message}
-              </pre>
+            {this.state.errorRef && (
+              <p className="mt-2 text-[10px] text-[#A3C4B1]/50 font-mono">
+                Ref: {this.state.errorRef}
+              </p>
             )}
           </div>
           <div className="flex gap-3">

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, type StorageValue } from 'zustand/middleware';
 import { OnboardingAnswers, FootprintBreakdown, calculateFootprint } from '../lib/calculations';
 import { LOGGABLE_ACTIONS, DEFAULT_BADGES, Badge } from '../lib/emissionFactors';
 
@@ -100,6 +100,85 @@ const DEFAULT_CHALLENGES: Challenge[] = [
     completed: false
   }
 ];
+
+// ─── Safe localStorage adapter ────────────────────────────────────────────────
+// Wraps every read/write in try/catch + schema validation so that corrupted,
+// tampered, or structurally invalid persisted data is discarded rather than
+// crashing the app. Never trusts raw localStorage content.
+
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/** Validate persisted state shape before hydrating the store */
+function validatePersistedState(raw: unknown): boolean {
+  if (!isPlainObject(raw)) return false;
+  const state = raw.state;
+  if (!isPlainObject(state)) return false;
+
+  // loggedActions must be an array
+  if (!Array.isArray(state.loggedActions)) return false;
+
+  // badges must be an array
+  if (!Array.isArray(state.badges)) return false;
+
+  // streak must be a finite positive number
+  const streak = state.streak;
+  if (typeof streak !== 'number' || !isFinite(streak) || streak < 0) return false;
+
+  // growthPoints must be a finite non-negative number
+  const gp = state.growthPoints;
+  if (typeof gp !== 'number' || !isFinite(gp) || gp < 0) return false;
+
+  // treeHealth must be 0-100
+  const th = state.treeHealth;
+  if (typeof th !== 'number' || !isFinite(th) || th < 0 || th > 100) return false;
+
+  return true;
+}
+
+const safeStorage = {
+  getItem(name: string): StorageValue<RootedState> | null {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(name) : null;
+      if (raw === null) return null;
+
+      const parsed: unknown = JSON.parse(raw);
+
+      if (!validatePersistedState(parsed)) {
+        console.warn('[Rooted] Persisted state failed validation — resetting to defaults.');
+        localStorage.removeItem(name);
+        return null;
+      }
+
+      return parsed as StorageValue<RootedState>;
+    } catch (err) {
+      console.warn('[Rooted] Failed to read localStorage:', err);
+      return null;
+    }
+  },
+
+  setItem(name: string, value: StorageValue<RootedState>): void {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(name, JSON.stringify(value));
+      }
+    } catch (err) {
+      console.warn('[Rooted] Failed to write localStorage:', err);
+    }
+  },
+
+  removeItem(name: string): void {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(name);
+      }
+    } catch (err) {
+      console.warn('[Rooted] Failed to remove localStorage key:', err);
+    }
+  },
+};
+
 
 export const useRootedStore = create<RootedState>()(
   persist(
@@ -292,6 +371,7 @@ export const useRootedStore = create<RootedState>()(
     }),
     {
       name: 'rooted-store',
+      storage: safeStorage,
     }
   )
 );

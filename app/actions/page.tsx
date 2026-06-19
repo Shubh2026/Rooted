@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bike, Train, Users, Leaf, Egg, Trash2, Sun, Plug, Thermometer, CupSoda, RefreshCw, ShoppingBag, Check, Compass, Info, TreePine } from 'lucide-react';
 import { useRootedStore } from '../../store/useRootedStore';
-import { LOGGABLE_ACTIONS } from '../../lib/emissionFactors';
+import { useActions, Category } from '../../hooks/useActions';
 import OrganicCard from '../../components/ui/OrganicCard';
 import OrganicButton from '../../components/ui/OrganicButton';
 
@@ -38,8 +38,6 @@ function CardSkeleton() {
 }
 
 // ─── Category tabs config ──────────────────────────────────────────────────────
-type Category = 'all' | 'transport' | 'food' | 'energy' | 'waste';
-
 const categoryTabs: { id: Category; label: string; emoji: string }[] = [
   { id: 'all',       label: 'All Items',    emoji: '🌿' },
   { id: 'transport', label: 'Transport',    emoji: '🚗' },
@@ -51,11 +49,19 @@ const categoryTabs: { id: Category; label: string; emoji: string }[] = [
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Actions() {
   const router = useRouter();
-  const { user, logAction, loggedActions } = useRootedStore();
+  const { user, loggedActions } = useRootedStore();
+  const [mounted, setMounted] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState<Category>('all');
-  const [successActionId,   setSuccessActionId]  = useState<string | null>(null);
-  const [mounted,           setMounted]           = useState(false);
+  const {
+    selectedCategory,
+    setSelectedCategory,
+    successActionId,
+    filteredActions,
+    totalOffset,
+    todayOffset,
+    logAction: handleLogClick,
+    loggedCounts,
+  } = useActions();
 
   // ── Split the two useEffects to satisfy Rules of Hooks order ──────────────
   useEffect(() => {
@@ -67,33 +73,6 @@ export default function Actions() {
       router.replace('/');
     }
   }, [mounted, user, router]);
-
-  // ── Stable filtered list ───────────────────────────────────────────────────
-  const filteredActions = useMemo(
-    () => LOGGABLE_ACTIONS.filter(
-      a => selectedCategory === 'all' || a.category === selectedCategory
-    ),
-    [selectedCategory]
-  );
-
-  // ── Stats ──────────────────────────────────────────────────────────────────
-  const totalOffset = useMemo(
-    () => loggedActions.reduce((s, a) => s + a.co2Saved, 0),
-    [loggedActions]
-  );
-  const todayOffset = useMemo(() => {
-    const today = new Date().toDateString();
-    return loggedActions
-      .filter(a => new Date(a.timestamp).toDateString() === today)
-      .reduce((s, a) => s + a.co2Saved, 0);
-  }, [loggedActions]);
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleLogClick = (actionId: string) => {
-    logAction(actionId);
-    setSuccessActionId(actionId);
-    setTimeout(() => setSuccessActionId(null), 1600);
-  };
 
   // ── Loading skeleton state (before hydration) ─────────────────────────────
   if (!mounted || !user) {
@@ -205,7 +184,7 @@ export default function Actions() {
             {filteredActions.map((action) => {
               const IconComponent = iconMap[action.icon] || Info;
               const isSuccess = successActionId === action.id;
-              const logCount = loggedActions.filter(l => l.actionId === action.id).length;
+              const logCount = loggedCounts[action.id] || 0;
 
               return (
                 <motion.div

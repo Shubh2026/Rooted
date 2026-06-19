@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * components/dashboard/TreeDashboard.tsx
+ * components/dashboard/TreeDisplay.tsx
  *
  * Center column: animated tree, growth progress bar, XP breakdown, growth tooltip.
  * Uses IntersectionObserver to pause Framer Motion animations when off-screen.
@@ -34,7 +34,13 @@ interface Props {
   healthLabel: string;
 }
 
-function TreeDashboard({
+/**
+ * TreeDisplay Component
+ *
+ * Renders the procedurally-growing SVG tree, progressive growth bar, stage milestones,
+ * and current XP contribution breakdown details.
+ */
+function TreeDisplay({
   growthProgress,
   reductionPercent,
   treeHealth,
@@ -235,4 +241,4 @@ function TreeDashboard({
   );
 }
 
-export default memo(TreeDashboard);
+export default memo(TreeDisplay);

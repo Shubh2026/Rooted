@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Leaf, Sparkles, Check } from 'lucide-react';
-import { useRootedStore } from '../../store/useRootedStore';
-import { OnboardingAnswers, calculateFootprint } from '../../lib/calculations';
+import { useCarbonCalculator } from '../../hooks/useCarbonCalculator';
 import ForestBackground from '../../components/tree/ForestBackground';
 import OrganicCard from '../../components/ui/OrganicCard';
 import OrganicButton from '../../components/ui/OrganicButton';
@@ -119,86 +118,37 @@ const BoxSVG = () => (
 
 export default function Onboarding() {
   const router = useRouter();
-  const { completeOnboarding } = useRootedStore();
-  
-  const [currentStep, setCurrentStep] = useState(0);
-  const [loadingStage, setLoadingStage] = useState(0);
-  const [showEncouragement, setShowEncouragement] = useState(false);
-  const [computedBaseline, setComputedBaseline] = useState<number>(0);
+  const {
+    currentStep,
+    totalSteps,
+    loadingStage,
+    sproutingMessages,
+    showEncouragement,
+    setShowEncouragement,
+    computedBaseline,
 
-  // Question answers
-  const [name, setName] = useState('');
-  const [transportMode, setTransportMode] = useState<OnboardingAnswers['transportMode']>('petrol');
-  const [transportDistance, setTransportDistance] = useState(60);
-  const [dietType, setDietType] = useState<OnboardingAnswers['dietType']>('average');
-  const [energyBill, setEnergyBill] = useState(300);
-  const [cleanEnergyRatio, setCleanEnergyRatio] = useState(15);
-  const [shortFlights, setShortFlights] = useState(1);
-  const [longFlights, setLongFlights] = useState(0);
-  const [shoppingStyle, setShoppingStyle] = useState<OnboardingAnswers['shoppingStyle']>('average');
+    name,
+    setName,
+    transportMode,
+    setTransportMode,
+    transportDistance,
+    setTransportDistance,
+    dietType,
+    setDietType,
+    energyBill,
+    setEnergyBill,
+    cleanEnergyRatio,
+    setCleanEnergyRatio,
+    shortFlights,
+    setShortFlights,
+    longFlights,
+    setLongFlights,
+    shoppingStyle,
+    setShoppingStyle,
 
-  const totalSteps = 6;
-
-  const nextStep = () => {
-    if (currentStep === 0 && !name.trim()) return;
-    
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      triggerSprouting();
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  const triggerSprouting = () => {
-    setCurrentStep(totalSteps); // Moves to loaders step
-    
-    const messages = [
-      'Sifting organic soil...',
-      'Planting your digital seed...',
-      'Watering the seedling...',
-      'Nurturing with sunlight...',
-      'Calculating annual footprint...'
-    ];
-
-    let current = 0;
-    const interval = setInterval(() => {
-      current++;
-      if (current < messages.length) {
-        setLoadingStage(current);
-      } else {
-        clearInterval(interval);
-        
-        // Execute footprint calculations
-        const answers: OnboardingAnswers = {
-          name,
-          transportMode,
-          transportDistance: transportMode === 'none' ? 0 : transportDistance,
-          dietType,
-          energyBill,
-          cleanEnergyRatio,
-          shortFlights,
-          longFlights,
-          shoppingStyle
-        };
-        
-        // Temporarily calculate to display baseline
-        const breakdown = calculateFootprint(answers);
-        setComputedBaseline(breakdown.total);
-        
-        // Commit onboarding answers to Zustand store
-        completeOnboarding(answers);
-        
-        // Show success encouraging popup modal
-        setShowEncouragement(true);
-      }
-    }, 800);
-  };
+    nextStep,
+    prevStep,
+  } = useCarbonCalculator();
 
   const slideVariants = {
     initial: { opacity: 0, x: 50 },
@@ -616,13 +566,7 @@ export default function Onboarding() {
                     exit={{ opacity: 0, y: -10 }}
                     className="font-serif font-bold text-lg text-[#E8EDE9]"
                   >
-                    {[
-                      'Sifting organic soil...',
-                      'Planting your digital seed...',
-                      'Watering the seedling...',
-                      'Nurturing with sunlight...',
-                      'Calculating annual footprint...'
-                    ][loadingStage]}
+                    {sproutingMessages[loadingStage]}
                   </motion.p>
                 </AnimatePresence>
                 <p className="text-[10px] text-[#A3C4B1] mt-1.5">

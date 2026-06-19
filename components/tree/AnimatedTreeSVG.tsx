@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useRootedStore } from '../../store/useRootedStore';
 
 // ─────────────────────────────────────────────
@@ -40,11 +40,25 @@ interface AnimatedTreeSVGProps {
 // ─────────────────────────────────────────────
 export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGProps) {
   const { hasNewBlossom, clearBlossomAlert } = useRootedStore();
-  const [mounted, setMounted] = useState(false);
-  const [prevStage, setPrevStage] = useState(0);
+  const [mounted,    setMounted]    = useState(false);
+  const [prevStage,  setPrevStage]  = useState(0);
   const [stageFlash, setStageFlash] = useState(false);
+  const [isVisible,  setIsVisible]  = useState(true);
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
 
   useEffect(() => { setMounted(true); }, []);
+
+  // ── Pause animations when off-screen (IntersectionObserver) ─────────────
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.05 },
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (hasNewBlossom) {
@@ -83,6 +97,9 @@ export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGP
   }, [stageInfo.stage]);
 
   if (!mounted) return null;
+
+  // Pause all looping animations when off-screen or reduced-motion is preferred
+  const shouldAnimate = isVisible && !prefersReduced;
 
   // ── Growth ratio used for sizing (0.30 → 1.05) ──────────────────────────────
   // Stage thresholds → visual growthRatio:
@@ -223,6 +240,7 @@ export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGP
 
   return (
     <div
+      ref={containerRef}
       className={`relative flex flex-col items-center justify-center w-full max-w-[420px] aspect-square rounded-3xl p-4 overflow-hidden select-none transition-all duration-1000 ${
         isAncient
           ? 'bg-gradient-to-b from-emerald-900/20 via-forest-900/10 to-transparent'
@@ -249,14 +267,14 @@ export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGP
             <motion.div
               className="absolute inset-0 rounded-3xl pointer-events-none z-0"
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ repeat: Infinity, duration: 3.5, ease: 'easeInOut' }}
+              animate={shouldAnimate ? { opacity: [0.3, 0.6, 0.3] } : { opacity: 0.3 }}
+              transition={{ repeat: shouldAnimate ? Infinity : 0, duration: 3.5, ease: 'easeInOut' }}
               style={{ boxShadow: 'inset 0 0 60px rgba(61,204,116,0.18)' }}
             />
             <motion.div
               className="absolute inset-0 rounded-3xl pointer-events-none z-0"
-              animate={{ opacity: [0.1, 0.3, 0.1] }}
-              transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut', delay: 1 }}
+              animate={shouldAnimate ? { opacity: [0.1, 0.3, 0.1] } : { opacity: 0.1 }}
+              transition={{ repeat: shouldAnimate ? Infinity : 0, duration: 5, ease: 'easeInOut', delay: 1 }}
               style={{ boxShadow: 'inset 0 0 100px rgba(90,224,140,0.1)' }}
             />
           </>
@@ -303,8 +321,8 @@ export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGP
             cx="200" cy={trunkTopY + 10}
             rx="160" ry="140"
             fill="url(#ancient-glow)"
-            animate={{ opacity: [0.6, 1, 0.6], ry: [140, 148, 140] }}
-            transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
+            animate={shouldAnimate ? { opacity: [0.6, 1, 0.6], ry: [140, 148, 140] } : { opacity: 0.6 }}
+            transition={{ repeat: shouldAnimate ? Infinity : 0, duration: 4, ease: 'easeInOut' }}
           />
         )}
 
@@ -315,16 +333,16 @@ export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGP
             r={p.r}
             fill={isAncient ? '#5ae08c' : '#a8dabc'}
             initial={{ cx: p.xStart, cy: 370, opacity: 0 }}
-            animate={{
-              cy: [370, 60],
-              cx: [p.xStart, p.xStart + p.xDrift, p.xStart],
+            animate={shouldAnimate ? {
+              cy:      [370, 60],
+              cx:      [p.xStart, p.xStart + p.xDrift, p.xStart],
               opacity: [0, isAncient ? 0.9 : 0.6, 0],
-            }}
+            } : { opacity: 0 }}
             transition={{
-              repeat: Infinity,
+              repeat:   shouldAnimate ? Infinity : 0,
               duration: p.dur,
-              ease: 'easeOut',
-              delay: p.delay,
+              ease:     'easeOut',
+              delay:    p.delay,
             }}
           />
         ))}

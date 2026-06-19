@@ -1,44 +1,33 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Bike, Leaf, Sun, Plug, Compass, Check } from 'lucide-react';
 import { useRootedStore } from '../store/useRootedStore';
 
+const QUICK_ACTIONS = [
+  { id: 'walk_bike_trip',    name: 'Walk/Bike',      icon: Bike, color: 'bg-emerald-500 hover:bg-emerald-600' },
+  { id: 'ate_vegan',         name: 'Vegan Meal',     icon: Leaf, color: 'bg-teal-500   hover:bg-teal-600'    },
+  { id: 'line_dry_laundry',  name: 'Line Dry',       icon: Sun,  color: 'bg-amber-500  hover:bg-amber-600'   },
+  { id: 'unplugged_vampire', name: 'Unplug Standby', icon: Plug, color: 'bg-sky-500    hover:bg-sky-600'     },
+];
+
 export default function FloatingActionButton() {
-  const [isOpen, setIsOpen]       = useState(false);
+  // ── ALL hooks must come before any early return ────────────────────────────
+  const [isOpen, setIsOpen]         = useState(false);
   const [lastLogged, setLastLogged] = useState<string | null>(null);
-  const { user, logAction }       = useRootedStore();
+  const { user, logAction }         = useRootedStore();
+  const menuRef                     = useRef<HTMLDivElement>(null);
+  const triggerRef                  = useRef<HTMLButtonElement>(null);
 
-  // ── Refs for focus trap ───────────────────────────────────────────────────
-  const menuRef   = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  if (!user) return null;
-
-  const quickActions = [
-    { id: 'walk_bike_trip',    name: 'Walk/Bike',      icon: Bike, color: 'bg-emerald-500 hover:bg-emerald-600' },
-    { id: 'ate_vegan',         name: 'Vegan Meal',     icon: Leaf, color: 'bg-teal-500   hover:bg-teal-600'    },
-    { id: 'line_dry_laundry',  name: 'Line Dry',       icon: Sun,  color: 'bg-amber-500  hover:bg-amber-600'   },
-    { id: 'unplugged_vampire', name: 'Unplug Standby', icon: Plug, color: 'bg-sky-500    hover:bg-sky-600'     },
-  ];
-
-  const handleQuickLog = (actionId: string, name: string) => {
-    logAction(actionId);
-    setLastLogged(name);
-    setTimeout(() => setLastLogged(null), 2000);
+  const handleClose = useCallback(() => {
     setIsOpen(false);
-    // Return focus to trigger after menu closes
+    // Return focus to the trigger button after the menu closes
     setTimeout(() => triggerRef.current?.focus(), 50);
-  };
+  }, []);
 
-  const handleClose = () => {
-    setIsOpen(false);
-    triggerRef.current?.focus();
-  };
-
-  // ── Keyboard handling: Escape closes, Tab traps focus ────────────────────
+  // ── Keyboard handling: Escape closes, Tab traps focus ─────────────────────
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (!isOpen) return;
@@ -71,7 +60,7 @@ export default function FloatingActionButton() {
         }
       }
     },
-    [isOpen],
+    [isOpen, handleClose],
   );
 
   // Move focus into menu when it opens
@@ -84,25 +73,32 @@ export default function FloatingActionButton() {
     }
   }, [isOpen]);
 
-  // Close on outside click
+  // Close on outside pointer-down
   useEffect(() => {
     if (!isOpen) return;
     const onPointerDown = (e: PointerEvent) => {
       if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(e.target as Node)
+        menuRef.current    && !menuRef.current.contains(e.target as Node) &&
+        triggerRef.current && !triggerRef.current.contains(e.target as Node)
       ) {
         handleClose();
       }
     };
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
+
+  // ── Early return AFTER all hooks ───────────────────────────────────────────
+  if (!user) return null;
+
+  const handleQuickLog = (actionId: string, name: string) => {
+    logAction(actionId);
+    setLastLogged(name);
+    setTimeout(() => setLastLogged(null), 2000);
+    handleClose();
+  };
 
   return (
-    /* Wrap everything so onKeyDown applies to the whole widget */
     <div
       className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 flex flex-col items-end"
       onKeyDown={handleKeyDown}
@@ -133,7 +129,7 @@ export default function FloatingActionButton() {
             aria-label="Quick eco-action log menu"
             className="flex flex-col items-end gap-3 mb-4"
           >
-            {quickActions.map((action, index) => {
+            {QUICK_ACTIONS.map((action, index) => {
               const Icon = action.icon;
               return (
                 <motion.div
@@ -145,11 +141,10 @@ export default function FloatingActionButton() {
                   }}
                   exit={{
                     opacity: 0, scale: 0.7, y: 15,
-                    transition: { delay: (quickActions.length - 1 - index) * 0.05 },
+                    transition: { delay: (QUICK_ACTIONS.length - 1 - index) * 0.05 },
                   }}
                   className="flex items-center gap-2 group"
                 >
-                  {/* Label */}
                   <span
                     id={`fab-label-${action.id}`}
                     className="bg-forest-800 text-[#E8EDE9] text-xs font-bold px-2.5 py-1 rounded-lg border border-card-border shadow-sm opacity-90 group-hover:opacity-100 transition-opacity"
@@ -157,7 +152,6 @@ export default function FloatingActionButton() {
                     {action.name}
                   </span>
 
-                  {/* Action button */}
                   <button
                     role="menuitem"
                     onClick={() => handleQuickLog(action.id, action.name)}
@@ -176,7 +170,7 @@ export default function FloatingActionButton() {
               initial={{ opacity: 0, scale: 0.7, y: 15 }}
               animate={{
                 opacity: 1, scale: 1, y: 0,
-                transition: { delay: quickActions.length * 0.05, type: 'spring', stiffness: 260, damping: 20 },
+                transition: { delay: QUICK_ACTIONS.length * 0.05, type: 'spring', stiffness: 260, damping: 20 },
               }}
               exit={{ opacity: 0, scale: 0.7, y: 15, transition: { delay: 0 } }}
               className="flex items-center gap-2 group"
@@ -201,10 +195,9 @@ export default function FloatingActionButton() {
       {/* Primary FAB trigger */}
       <button
         ref={triggerRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen(prev => !prev)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        aria-controls={isOpen ? 'fab-menu' : undefined}
         aria-label={isOpen ? 'Close quick log menu' : 'Open quick log menu'}
         className={`w-14 h-14 rounded-full ${
           isOpen

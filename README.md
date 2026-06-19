@@ -79,12 +79,19 @@ Users begin with a detailed carbon footprint onboarding quiz, receive a calculat
 - Success toast notification with tree-growth confirmation
 - "All Actions" shortcut link
 
-### 🛡️ Stability & UX Polish
-- **Global React Error Boundary** — graceful recovery UI instead of blank screen
-- Rules-of-Hooks compliant throughout (split `useEffect` pattern on every page)
-- Hydration-safe animations (no `Math.random()` in render)
-- Full TypeScript — zero `any` escapes in business logic
-- Responsive for mobile and desktop; mobile bottom nav bar
+### 🛡️ Stability, Security & Accessibility
+- **Comprehensive Unit Testing** — 55 unit tests using **Vitest** validating calculations, badge unlocks, streak progression, and mock data generators.
+- **Enterprise-Grade Security Headers** — Configured via `next.config.ts`, featuring a strict `Content-Security-Policy` (CSP), `X-Frame-Options: DENY` (clickjacking protection), HSTS (HTTPS preload), `X-Content-Type-Options: nosniff` (MIME-sniffing protection), and `Referrer-Policy`.
+- **Sanitized localStorage Persistence** — Robust schema validation and exception handling when reading/writing client state.
+- **Accessibility (WCAG 2.1 AA) Compliance**:
+  - **High Contrast Mode** toggle to enhance readability for low-vision users.
+  - Full keyboard accessibility and focus trapping on the expandable FAB menu.
+  - Descriptive ARIA attributes (`role="img"`, `<title>`, `<desc>`) dynamically describing the tree growth stage and health.
+  - Visual color-only states supplemented by pattern overlays and textual labels.
+- **Global React Error Boundary** — Graceful recovery UI instead of a blank screen.
+- **Hydration-safe animations** — Pre-seeded LCG pseudo-random number generator for particles to avoid hydration mismatches.
+- **Full TypeScript** — Zero `any` escapes in business logic.
+- **Responsive Navigation** — Desktop top-bar plus a mobile-first bottom nav bar.
 
 ---
 

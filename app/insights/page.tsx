@@ -11,26 +11,15 @@ import OrganicCard from '../../components/ui/OrganicCard';
 import OrganicButton from '../../components/ui/OrganicButton';
 import ProgressRing from '../../components/ui/ProgressRing';
 
-interface MockNeighbor {
-  name: string;
-  avatar: string;
-  emissions: number; // tonnes
-  xp: number;
-  treeType: string;
-  leafColor: string;
-  swayDelay: string;
-}
-
-const MOCK_NEIGHBORS: MockNeighbor[] = [
-  { name: 'Aria', avatar: '👩‍🌾', emissions: 3.2, xp: 820, treeType: 'Emerald Willow', leafColor: 'bg-emerald-500', swayDelay: '0s' },
-  { name: 'Leo', avatar: '👨‍🚀', emissions: 8.5, xp: 340, treeType: 'Swaying Birch', leafColor: 'bg-forest-400', swayDelay: '1.2s' },
-  { name: 'Freya', avatar: '👩‍🎨', emissions: 2.1, xp: 1200, treeType: 'Ancient Spruce', leafColor: 'bg-teal-500', swayDelay: '0.5s' },
-  { name: 'Kai', avatar: '👨‍🎤', emissions: 12.8, xp: 90, treeType: 'Dry Elm', leafColor: 'bg-earth-300', swayDelay: '2s' },
-];
+import { getDynamicNeighbors, MockNeighbor } from '../../lib/neighbors';
 
 export default function Insights() {
   const router = useRouter();
   const { user, currentFootprint, challenges, completeChallenge, loggedActions, streak } = useRootedStore();
+  
+  // Dynamic mock neighbors loaded from lib
+  const neighbors = React.useMemo(() => getDynamicNeighbors(), []);
+  
   const [selectedNeighbor, setSelectedNeighbor] = useState<MockNeighbor | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -231,7 +220,7 @@ export default function Insights() {
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center mb-6">
-              {MOCK_NEIGHBORS.map((neighbor) => (
+              {neighbors.map((neighbor) => (
                 <button
                   key={neighbor.name}
                   onClick={() => setSelectedNeighbor(neighbor)}

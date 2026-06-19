@@ -3,19 +3,37 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Compass, LineChart, Leaf, LogOut } from 'lucide-react';
+import { LayoutDashboard, Compass, LineChart, Leaf, LogOut, Sun } from 'lucide-react';
 import { useRootedStore } from '../store/useRootedStore';
 
 export default function Navigation() {
   const pathname = usePathname();
   const { user, resetProgress } = useRootedStore();
   const [mounted, setMounted] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Force dark mode at the HTML level
     document.documentElement.classList.add('dark');
+    // Restore high-contrast preference
+    const saved = localStorage.getItem('rooted-high-contrast');
+    if (saved === 'true') {
+      setHighContrast(true);
+      document.documentElement.classList.add('high-contrast');
+    }
   }, []);
+
+  const toggleHighContrast = () => {
+    const next = !highContrast;
+    setHighContrast(next);
+    if (next) {
+      document.documentElement.classList.add('high-contrast');
+      localStorage.setItem('rooted-high-contrast', 'true');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+      localStorage.setItem('rooted-high-contrast', 'false');
+    }
+  };
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -65,7 +83,22 @@ export default function Navigation() {
           <span className="text-xs font-semibold px-3 py-1 bg-forest-950/60 dark:bg-forest-900 text-cream-100 dark:text-forest-400 rounded-full border border-forest-800/40">
             🌱 {user.name}
           </span>
-          
+
+          {/* High Contrast toggle */}
+          <button
+            onClick={toggleHighContrast}
+            aria-pressed={highContrast}
+            aria-label={highContrast ? 'Disable high contrast mode' : 'Enable high contrast mode'}
+            title={highContrast ? 'High contrast: ON' : 'High contrast: OFF'}
+            className={`p-2 rounded-full border transition-all duration-300 cursor-pointer focus-visible:ring-2 focus-visible:ring-forest-300 ${
+              highContrast
+                ? 'border-yellow-400 bg-yellow-400/20 text-yellow-300'
+                : 'border-forest-800/30 bg-forest-950/60 text-[#A3C4B1] hover:text-white hover:border-forest-600'
+            }`}
+          >
+            <Sun className="w-4 h-4" aria-hidden="true" />
+          </button>
+
           <button
             onClick={() => {
               if (confirm('Are you sure you want to reset your garden? This deletes all progress.')) {
@@ -76,7 +109,7 @@ export default function Navigation() {
             aria-label="Reset game progress"
             className="p-2 rounded-full border border-red-900/30 bg-red-950/20 hover:bg-red-900/30 text-red-400 hover:text-red-300 transition-all duration-300 cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </nav>
@@ -102,6 +135,19 @@ export default function Navigation() {
           );
         })}
         
+        {/* High Contrast toggle — mobile */}
+        <button
+          onClick={toggleHighContrast}
+          aria-pressed={highContrast}
+          aria-label={highContrast ? 'Disable high contrast mode' : 'Enable high contrast mode'}
+          className={`flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl transition-all duration-300 cursor-pointer ${
+            highContrast ? 'text-yellow-300' : 'text-[#a1b0a5] hover:text-cream-100'
+          }`}
+        >
+          <Sun className="w-5 h-5" aria-hidden="true" />
+          <span className="text-[10px] tracking-tight">Contrast</span>
+        </button>
+
         {/* Reset Progress on mobile */}
         <button
           onClick={() => {
@@ -113,7 +159,7 @@ export default function Navigation() {
           aria-label="Reset progress"
           className="flex flex-col items-center justify-center gap-0.5 p-2 text-red-400 hover:text-red-300 cursor-pointer"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5" aria-hidden="true" />
           <span className="text-[10px] tracking-tight">Reset</span>
         </button>
       </nav>

@@ -263,12 +263,23 @@ export default function AnimatedTreeSVG({ growthProgress = 0 }: AnimatedTreeSVGP
         )}
       </AnimatePresence>
 
-      {/* SVG Viewport */}
+      {/* SVG Viewport — accessible image with title + desc for screen readers */}
       <svg
         viewBox="0 0 400 400"
         className="w-full h-full relative z-10"
         style={{ filter: treeFilter, transition: 'filter 1.5s ease' }}
+        role="img"
+        aria-labelledby={`tree-title-${stageInfo.stage}`}
+        aria-describedby={`tree-desc-${stageInfo.stage}`}
       >
+        {/* Accessible text — hidden visually, read by screen readers */}
+        <title id={`tree-title-${stageInfo.stage}`}>
+          {stageInfo.icon} {stageInfo.name} — {growthProgress}% growth
+        </title>
+        <desc id={`tree-desc-${stageInfo.stage}`}>
+          {stageInfo.desc}. Tree health: {Math.round(growthProgress)}%.
+          {isAncient ? ' Your tree has reached full Ancient Tree status.' : ''}
+        </desc>
         <defs>
           <radialGradient id="sunlight-glow" cx="30%" cy="30%" r="70%">
             <stop offset="0%"   stopColor={isAncient ? 'rgba(90,224,140,0.12)' : 'rgba(255,220,100,0.08)'} />

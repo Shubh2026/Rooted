@@ -1,6 +1,8 @@
 <div align="center">
 
 # 🌳 Rooted
+**[Try Rooted Now](https://rooted-murex.vercel.app)**
+
 ### *Grow Your Impact. Nurture Your World.*
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.x-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)

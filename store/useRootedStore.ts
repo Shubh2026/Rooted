@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, type StorageValue } from 'zustand/middleware';
 import { OnboardingAnswers, FootprintBreakdown, calculateFootprint } from '../lib/calculations';
 import { LOGGABLE_ACTIONS, DEFAULT_BADGES, Badge } from '../lib/emissionFactors';
+import { shouldUnlockBadge } from '../utils/badgeUtils';
 
 export interface LoggedActionInstance {
   id: string;
@@ -291,21 +292,7 @@ export const useRootedStore = create<RootedState>()(
         const updatedBadges = get().badges.map(badge => {
           if (badge.unlockedAt) return badge;
 
-          let shouldUnlock = false;
-          if (badge.id === 'first_steps') {
-            shouldUnlock = true;
-          } else if (badge.id === 'streak_3' && updatedStreak >= 3) {
-            shouldUnlock = true;
-          } else if (badge.id === 'vegan_vanguard') {
-            const veganLogs = actionHistory.filter(act => act.actionId === 'ate_vegan').length;
-            shouldUnlock = veganLogs >= 5;
-          } else if (badge.id === 'transit_pro') {
-            const transitLogs = actionHistory.filter(act => act.category === 'transport').length;
-            shouldUnlock = transitLogs >= 5;
-          } else if (badge.id === 'energy_saver') {
-            const energyLogs = actionHistory.filter(act => act.category === 'energy').length;
-            shouldUnlock = energyLogs >= 5;
-          }
+          const shouldUnlock = shouldUnlockBadge(badge.id, updatedStreak, actionHistory);
 
           if (shouldUnlock) {
             return { ...badge, unlockedAt: timestampStr };
